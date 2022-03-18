@@ -58,16 +58,22 @@ DynamicArray<NodeGraph::Node*> NodeGraph::findPath(Node* start, Node* goal)
 		for (int i = 0; i < currentNode->edges.getLength(); i++)
 		{
 			//If the current edge of the current node has not been added to the open or closed list
-			if (!closedList.contains(currentNode->edges.getItem(i).target) && !openedList.contains(currentNode->edges.getItem(i).target))
+			if (!closedList.contains(currentNode->edges.getItem(i).target))
 			{
-				//Add the item to the openedList
-				openedList.addItem(currentNode->edges.getItem(i).target);
+				if (!openedList.contains(currentNode->edges.getItem(i).target) || 
+					(openedList.contains(currentNode->edges.getItem(i).target) && currentNode->edges.getItem(i).target->gScore > currentNode->gScore + currentNode->edges.getItem(i).cost))
+				{
+					//Make the item's previous node be the current node
+					currentNode->edges.getItem(i).target->previous = currentNode;
 
-				//Make the item's previous node be the current node
-				currentNode->edges.getItem(i).target->previous = currentNode;
-
-				//Make the node's gScore equal to the current gScore plus the cost
-				currentNode->edges.getItem(i).target->gScore = currentNode->gScore + currentNode->edges.getItem(i).cost;
+					//Make the node's gScore equal to the current gScore plus the cost
+					currentNode->edges.getItem(i).target->gScore = currentNode->gScore + currentNode->edges.getItem(i).cost;
+				}
+				if (!openedList.contains(currentNode->edges.getItem(i).target))
+				{
+					//Add the item to the openedList
+					openedList.addItem(currentNode->edges.getItem(i).target);
+				}
 			}
 		}
 
