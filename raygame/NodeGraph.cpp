@@ -52,30 +52,50 @@ DynamicArray<NodeGraph::Node*> NodeGraph::findPath(Node* start, Node* goal)
 
 	while (openedList.getLength() > 0)
 	{
+		//Get the new current node from the openedList
 		currentNode = openedList.getItem(0);
-		openedList.remove(0);
+
 		for (int i = 0; i < currentNode->edges.getLength(); i++)
 		{
-			if (!closedList.contains(currentNode->edges.getItem(i).target))
+			//If the current edge of the current node has not been added to the open or closed list
+			if (!closedList.contains(currentNode->edges.getItem(i).target) && !openedList.contains(currentNode->edges.getItem(i).target))
 			{
+				//Add the item to the openedList
 				openedList.addItem(currentNode->edges.getItem(i).target);
+
+				//Make the item's previous node be the current node
 				currentNode->edges.getItem(i).target->previous = currentNode;
+
+				//Make the node's gScore equal to the current gScore plus the cost
 				currentNode->edges.getItem(i).target->gScore = currentNode->gScore + currentNode->edges.getItem(i).cost;
 			}
-			
 		}
+
+		//Add the current node to the closed list and remove it from the opened List
+		openedList.remove(currentNode);
 		closedList.addItem(currentNode);
-		openedList.sortItems();
+
+		//Sort the opened List
+		int j = 0;
+		for (int i = 0; i < openedList.getLength(); i++)
+		{
+			Edge* key = (Edge*)openedList.getItem(i);
+			j = i - 1;
+
+
+			while (j >= 0 && openedList.getItem(j) > key->cost)
+			{
+				Node* nodeToChange = openedList.getItem(j + 1);
+				nodeToChange = openedList.getItem(j);
+				j--;
+			}
+
+			Node* nodeToChange = openedList.getItem(j + 1);
+			nodeToChange = openedList.getItem(i);
+		}
 	}
 
-	DynamicArray<NodeGraph::Node*> pathfound;
-	for (int i = 0; !pathfound.contains(start); i++)
-	{
-		pathfound.addItem(currentNode);
-		currentNode = currentNode->previous;
-	}
-
-	return pathfound;
+	return reconstructPath(start,goal);
 }
 
 void NodeGraph::drawGraph(Node* start)
