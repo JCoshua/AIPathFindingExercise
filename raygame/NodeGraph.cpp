@@ -79,11 +79,9 @@ DynamicArray<NodeGraph::Node*> NodeGraph::findPath(Node* start, Node* goal)
 		int j = 0;
 		for (int i = 0; i < openedList.getLength(); i++)
 		{
-			Edge* key = (Edge*)openedList.getItem(i);
 			j = i - 1;
 
-
-			while (j >= 0 && openedList.getItem(j) > key->cost)
+			while (j >= 0 && openedList.getItem(j)->gScore > openedList.getItem(i)->gScore)
 			{
 				Node* nodeToChange = openedList.getItem(j + 1);
 				nodeToChange = openedList.getItem(j);
