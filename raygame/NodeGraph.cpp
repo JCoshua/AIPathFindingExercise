@@ -9,7 +9,7 @@ DynamicArray<NodeGraph::Node*> reconstructPath(NodeGraph::Node* start, NodeGraph
 
 	while (currentNode != start->previous)
 	{
-		currentNode->color = 0xFFFF00FF;
+		currentNode->color = 0x00FF00FF;
 		path.insert(currentNode, 0);
 		currentNode = currentNode->previous;
 	}
@@ -44,38 +44,39 @@ void sortFScore(DynamicArray<NodeGraph::Node*>& nodes)
 
 DynamicArray<NodeGraph::Node*> NodeGraph::findPath(Node* start, Node* goal)
 {
+	resetGraphScore(start);
 	//Insert algorithm here
 	DynamicArray<NodeGraph::Node*> openedList;
 	DynamicArray<NodeGraph::Node*> closedList;
 	Node* currentNode = start;
 	openedList.addItem(currentNode);
+	start->color = 0x00FF00FF;
 
 	while (openedList.getLength() > 0)
 	{
 		//Sort the opened List
+		NodeGraph::Node* key = nullptr;
 		int j = 0;
 		for (int i = 0; i < openedList.getLength(); i++)
 		{
+			key = openedList[i];
 			j = i - 1;
 
-			while (j >= 0 && openedList.getItem(j)->gScore > openedList.getItem(i)->gScore)
+			while (j >= 0 && openedList[j]->gScore > openedList[i]->gScore)
 			{
-				Node* nodeToChange = openedList.getItem(j + 1);
-				nodeToChange = openedList.getItem(j);
-				j--;
+				openedList[j + 1] = openedList[j];
+				j++;
 			}
-
-			Node* nodeToChange = openedList.getItem(j + 1);
-			nodeToChange = openedList.getItem(i);
+			openedList[j + 1] = key;
 		}
 
 		//Get the new current node from the openedList
 		currentNode = openedList.getItem(0);
-
+		currentNode->color = 0xFF0000FF;
 		for (int i = 0; i < currentNode->edges.getLength(); i++)
 		{
 			//If the current edge of the current node has not been added to the open or closed list
-			if (!closedList.contains(currentNode->edges.getItem(i).target))
+			if (!closedList.contains(currentNode->edges.getItem(i).target) && currentNode->edges.getItem(i).target->walkable)
 			{
 				if (!openedList.contains(currentNode->edges.getItem(i).target) || 
 					(openedList.contains(currentNode->edges.getItem(i).target) && currentNode->edges.getItem(i).target->gScore > currentNode->gScore + currentNode->edges.getItem(i).cost))
@@ -85,6 +86,7 @@ DynamicArray<NodeGraph::Node*> NodeGraph::findPath(Node* start, Node* goal)
 
 					//Make the node's gScore equal to the current gScore plus the cost
 					currentNode->edges.getItem(i).target->gScore = currentNode->gScore + currentNode->edges.getItem(i).cost;
+
 				}
 				if (!openedList.contains(currentNode->edges.getItem(i).target))
 				{
