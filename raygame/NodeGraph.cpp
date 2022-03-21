@@ -52,6 +52,23 @@ DynamicArray<NodeGraph::Node*> NodeGraph::findPath(Node* start, Node* goal)
 
 	while (openedList.getLength() > 0)
 	{
+		//Sort the opened List
+		int j = 0;
+		for (int i = 0; i < openedList.getLength(); i++)
+		{
+			j = i - 1;
+
+			while (j >= 0 && openedList.getItem(j)->gScore > openedList.getItem(i)->gScore)
+			{
+				Node* nodeToChange = openedList.getItem(j + 1);
+				nodeToChange = openedList.getItem(j);
+				j--;
+			}
+
+			Node* nodeToChange = openedList.getItem(j + 1);
+			nodeToChange = openedList.getItem(i);
+		}
+
 		//Get the new current node from the openedList
 		currentNode = openedList.getItem(0);
 
@@ -81,22 +98,8 @@ DynamicArray<NodeGraph::Node*> NodeGraph::findPath(Node* start, Node* goal)
 		openedList.remove(currentNode);
 		closedList.addItem(currentNode);
 
-		//Sort the opened List
-		int j = 0;
-		for (int i = 0; i < openedList.getLength(); i++)
-		{
-			j = i - 1;
-
-			while (j >= 0 && openedList.getItem(j)->gScore > openedList.getItem(i)->gScore)
-			{
-				Node* nodeToChange = openedList.getItem(j + 1);
-				nodeToChange = openedList.getItem(j);
-				j--;
-			}
-
-			Node* nodeToChange = openedList.getItem(j + 1);
-			nodeToChange = openedList.getItem(i);
-		}
+		if(currentNode == goal)
+			return reconstructPath(start, goal);
 	}
 
 	return reconstructPath(start,goal);
