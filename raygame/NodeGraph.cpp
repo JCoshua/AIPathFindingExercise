@@ -76,7 +76,7 @@ DynamicArray<NodeGraph::Node*> NodeGraph::findPath(Node* start, Node* goal)
 		for (int i = 0; i < currentNode->edges.getLength(); i++)
 		{
 			//If the current edge of the current node has not been added to the open or closed list
-			if (!closedList.contains(currentNode->edges.getItem(i).target) && currentNode->edges.getItem(i).target->walkable)
+			if (!closedList.contains(currentNode->edges.getItem(i).target))
 			{
 				if (!openedList.contains(currentNode->edges.getItem(i).target) || 
 					(openedList.contains(currentNode->edges.getItem(i).target) && currentNode->edges.getItem(i).target->gScore > currentNode->gScore + currentNode->edges.getItem(i).cost))
