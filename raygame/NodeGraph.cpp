@@ -25,6 +25,11 @@ float diagonalDistance(NodeGraph::Node* node, NodeGraph::Node* goal, float cardi
 	return cardinalCost * (displacementX + displacementY) + (diagonalCost - 2 * cardinalCost) * fmin(displacementX, displacementY);
 }
 
+float NodeGraph::calculateManhattanDistance(Node* firstNode, Node* secondNode)
+{
+	return abs(firstNode->position.x - secondNode->position.x) + abs(firstNode->position.y - secondNode->position.y);
+}
+
 void sortFScore(DynamicArray<NodeGraph::Node*>& nodes)
 {
 	NodeGraph::Node* key = nullptr;
@@ -71,7 +76,7 @@ DynamicArray<NodeGraph::Node*> NodeGraph::findPath(Node* start, Node* goal)
 					//Make the item's previous node be the current node
 					currentNode->edges.getItem(i).target->previous = currentNode;
 
-					float hScore = calculateManhattanDistance(currentNode->edges.getItem(i).target, goal);
+					float hScore = diagonalDistance(currentNode->edges.getItem(i).target, goal, currentNode->edges.getItem(i).cost, currentNode->edges.getItem(i).cost * 1.5f);
 					//Make the node's gScore equal to the current gScore plus the cost
 					currentNode->edges.getItem(i).target->fScore = currentNode->gScore + currentNode->edges.getItem(i).cost + hScore;
 
@@ -135,11 +140,6 @@ void NodeGraph::drawConnectedNodes(Node* node, DynamicArray<Node*>& drawnList)
 			drawConnectedNodes(e.target, drawnList);
 		}
 	}
-}
-
-float NodeGraph::calculateManhattanDistance(Node* firstNode, Node* secondNode)
-{
-	return abs(firstNode->position.x - secondNode->position.x) + abs(firstNode->position.y - secondNode->position.y);
 }
 
 void NodeGraph::resetGraphScore(Node * start)
