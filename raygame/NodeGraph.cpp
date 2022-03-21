@@ -55,28 +55,15 @@ DynamicArray<NodeGraph::Node*> NodeGraph::findPath(Node* start, Node* goal)
 	while (openedList.getLength() > 0)
 	{
 		//Sort the opened List
-		NodeGraph::Node* key = nullptr;
-		int j = 0;
-		for (int i = 0; i < openedList.getLength(); i++)
-		{
-			key = openedList[i];
-			j = i - 1;
-
-			while (j >= 0 && openedList[j]->gScore > openedList[i]->gScore)
-			{
-				openedList[j + 1] = openedList[j];
-				j++;
-			}
-			openedList[j + 1] = key;
-		}
+		sortFScore(openedList);
 
 		//Get the new current node from the openedList
 		currentNode = openedList.getItem(0);
-		currentNode->color = 0xFF0000FF;
+		currentNode->color = 0xFFFF00FF;
 		for (int i = 0; i < currentNode->edges.getLength(); i++)
 		{
 			//If the current edge of the current node has not been added to the open or closed list
-			if (!closedList.contains(currentNode->edges.getItem(i).target))
+			if (!closedList.contains(currentNode->edges.getItem(i).target) && currentNode->edges.getItem(i).target->walkable)
 			{
 				if (!openedList.contains(currentNode->edges.getItem(i).target) || 
 					(openedList.contains(currentNode->edges.getItem(i).target) && currentNode->edges.getItem(i).target->gScore > currentNode->gScore + currentNode->edges.getItem(i).cost))
@@ -84,8 +71,9 @@ DynamicArray<NodeGraph::Node*> NodeGraph::findPath(Node* start, Node* goal)
 					//Make the item's previous node be the current node
 					currentNode->edges.getItem(i).target->previous = currentNode;
 
+					float hScore = calculateManhattanDistance(currentNode->edges.getItem(i).target, goal);
 					//Make the node's gScore equal to the current gScore plus the cost
-					currentNode->edges.getItem(i).target->gScore = currentNode->gScore + currentNode->edges.getItem(i).cost;
+					currentNode->edges.getItem(i).target->fScore = currentNode->gScore + currentNode->edges.getItem(i).cost + hScore;
 
 				}
 				if (!openedList.contains(currentNode->edges.getItem(i).target))
@@ -116,7 +104,7 @@ void NodeGraph::drawGraph(Node* start)
 void NodeGraph::drawNode(Node* node, float size)
 {
 	static char buffer[10];
-	sprintf_s(buffer, "%.0f", node->gScore);
+	sprintf_s(buffer, "%.0f", node->fScore);
 
 	//Draw the circle for the outline
 	DrawCircle((int)node->position.x, (int)node->position.y, size + 1, GetColor(node->color));
@@ -147,6 +135,11 @@ void NodeGraph::drawConnectedNodes(Node* node, DynamicArray<Node*>& drawnList)
 			drawConnectedNodes(e.target, drawnList);
 		}
 	}
+}
+
+float NodeGraph::calculateManhattanDistance(Node* firstNode, Node* secondNode)
+{
+	return abs(firstNode->position.x - secondNode->position.x) + abs(firstNode->position.y - secondNode->position.y);
 }
 
 void NodeGraph::resetGraphScore(Node * start)
